@@ -15,4 +15,8 @@ class Question extends Model
     'choiceD',
     'answer',
 ];
+    public function categories()
+    {
+        return $this->belongsToMany(Category::class);
+    }
 }

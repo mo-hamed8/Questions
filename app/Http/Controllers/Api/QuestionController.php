@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Answer;
+use App\Models\Category;
 use App\Models\Question;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -14,28 +15,43 @@ class QuestionController extends Controller
 
     public function index()
     {
-        return response()->json(Question::all(), 200);
+        // جلب كل الأسئلة مع التصنيفات
+        $questions = Question::with('categories')->get();
+
+        // نعيد JSON مباشر
+        return response()->json($questions, 200);
     }
     //
 
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
+        $data = $request->validate([
+            'categories' => 'array',
+            'categories.*' => 'string',
             'questions' => 'required|array',
             'questions.*.title' => 'required|string',
             'questions.*.choiceA' => 'required|string',
             'questions.*.choiceB' => 'required|string',
             'questions.*.choiceC' => 'required|string',
             'questions.*.choiceD' => 'required|string',
-            'questions.*.answer' => 'required|string|in:A,B,C,D',
+            'questions.*.answer' => 'required|string',
         ]);
 
-        $questions = Question::insert($validated['questions']);
+        // إنشاء أو استدعاء التصنيفات
+        $categoryIds = [];
+        foreach ($data['categories'] as $catName) {
+            $category = Category::firstOrCreate(['name' => $catName]);
+            $categoryIds[] = $category->id;
+        }
 
-        return response()->json([
-            'message' => 'Questions stored successfully',
-        ], 201);
+        // إنشاء الأسئلة وربطها بالتصنيفات
+        foreach ($data['questions'] as $qData) {
+            $question = Question::create($qData);
+            $question->categories()->attach($categoryIds);
+        }
+
+        return response()->json(['message' => 'Questions saved with categories']);
     }
 
 
