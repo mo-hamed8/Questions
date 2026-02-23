@@ -17,10 +17,13 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-Route::view("questions","questions.index");
-Route::view("questions/create","questions.create");
+Route::view("questions","questions.index")->name("questions.index");
+Route::view("questions/create","questions.create")->name("questions.create");
 
+Route::view("selectFilters","filters")->name("selectFilters");
+Route::view("questionByFilter/{categories}","questions.questionsByFilter")->name("questionByFilter");
 
+Route::view('home', 'home');
 
 
 require __DIR__.'/auth.php';
