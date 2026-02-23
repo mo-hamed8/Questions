@@ -17,8 +17,8 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-Route::view("questions","questions.index")->middleware("auth");
-Route::view("questions/create","questions.create")->middleware("auth");
+Route::view("questions","questions.index");
+Route::view("questions/create","questions.create");
 
 
 
