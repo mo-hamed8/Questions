@@ -68,7 +68,7 @@ class QuestionController extends Controller
         $isCorrect = strtolower($request["choice"]) === strtolower($question->answer);
 
         Answer::create([
-            "user_id" => "1",
+            "user_id" => env('DEFULT_USER_ID'),
             "question_id" => $question->id,
             "selectedChoice" => $request["choice"],
             "isCorrect" => $isCorrect

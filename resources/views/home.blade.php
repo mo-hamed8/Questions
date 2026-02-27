@@ -53,6 +53,11 @@
                 <h2 class="text-xl font-semibold text-gray-800 mb-2">Select Filters</h2>
                 <p class="text-gray-500 text-sm">Choose categories to generate a worksheet.</p>
             </a>
+            <a href="{{ route("wrongQuestionsToday") }}"
+               class="card-hover block p-6 bg-white rounded-xl shadow hover:bg-indigo-50 text-center">
+                <h2 class="text-xl font-semibold text-gray-800 mb-2">wrong Questions Today</h2>
+                <p class="text-gray-500 text-sm">Choose categories to generate a worksheet.</p>
+            </a>
 
         </div>
 

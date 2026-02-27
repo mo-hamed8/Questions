@@ -17,3 +17,4 @@ Route::post("answer",[QuestionController::class,"answer"]);
 Route::get("categories",[CategoryController::class,"index"]);
 
 Route::get("questionByFilter/{categories}",[FilterController::class,"questionByFilter"]);
+Route::get("wrongQuestionsToday",[FilterController::class,"wrongQuestionsToday"]);
