@@ -26,6 +26,7 @@ button.secondary { background:#eef2ff; color:#111827; border:1px solid #dbe2ff; 
 .questionCard { border:1px solid #e5e7eb; border-radius:10px; padding:12px; margin-bottom:10px; background:#fafafa; }
 .correct { color:green; font-weight:bold; }
 .questionHeader { display:flex; align-items:center; gap:10px; margin-bottom:6px; }
+.answerDiv { margin-left:10px; }
 </style>
 </head>
 
@@ -33,7 +34,7 @@ button.secondary { background:#eef2ff; color:#111827; border:1px solid #dbe2ff; 
 <div class="wrap">
 <div class="card">
 <h1>Paste JSON & Select Categories</h1>
-<p>Paste your JSON below, select categories or add new ones, preview questions, delete wrong ones, then send.</p>
+<p>Paste your JSON below, select categories or add new ones, preview questions, delete wrong ones, change answers, then send.</p>
 
 <p>Categories:</p>
 <div id="categories"></div>
@@ -141,31 +142,61 @@ function previewQuestions() {
         currentObject = obj;
         currentQuestions = [...obj.questions];
         renderQuestions();
-        setStatus('ok','Preview ready. You can delete wrong questions.');
+        setStatus('ok','Preview ready. You can delete wrong questions or change answers.');
     } catch (e) {
         setStatus('bad','Invalid JSON: ' + e.message);
     }
 }
 
-// Render questions in preview
+// Render questions in preview with original answer highlighted and editable dropdown
 function renderQuestions() {
     previewBox.innerHTML = '';
     currentQuestions.forEach((q,index)=>{
         const card = document.createElement('div');
         card.className='questionCard';
+
+        const getClass = (opt)=> q.answer === opt ? 'correct' : '';
+
         card.innerHTML = `
         <div class="questionHeader">
             <input type="checkbox" data-index="${index}">
             <b>Q${index+1}: ${q.title}</b>
         </div>
-        <div class="${q.answer==='A'?'correct':''}">A) ${q.choiceA}</div>
-        <div class="${q.answer==='B'?'correct':''}">B) ${q.choiceB}</div>
-        <div class="${q.answer==='C'?'correct':''}">C) ${q.choiceC}</div>
-        <div class="${q.answer==='D'?'correct':''}">D) ${q.choiceD}</div>
-        <br><b>Answer:</b> ${q.answer}
+        <div class="answerDiv ${getClass('A')}">A) ${q.choiceA}</div>
+        <div class="answerDiv ${getClass('B')}">B) ${q.choiceB}</div>
+        <div class="answerDiv ${getClass('C')}">C) ${q.choiceC}</div>
+        <div class="answerDiv ${getClass('D')}">D) ${q.choiceD}</div>
+        <br>
+        <label><b>Answer:</b>
+            <select data-index="${index}" class="answerSelect">
+                <option value="A" ${q.answer==='A'?'selected':''}>A</option>
+                <option value="B" ${q.answer==='B'?'selected':''}>B</option>
+                <option value="C" ${q.answer==='C'?'selected':''}>C</option>
+                <option value="D" ${q.answer==='D'?'selected':''}>D</option>
+            </select>
+        </label>
         `;
+
         previewBox.appendChild(card);
     });
+
+    // Update answer when dropdown changes without full rerender
+    document.querySelectorAll('.answerSelect').forEach(sel=>{
+        sel.addEventListener('change', e=>{
+            const idx = parseInt(e.target.dataset.index);
+            currentQuestions[idx].answer = e.target.value;
+
+            // Remove old .correct classes
+            const card = previewBox.children[idx];
+            card.querySelectorAll('.answerDiv').forEach(div=> div.classList.remove('correct'));
+            // Add class to new correct answer
+            const optionMap = {A:0,B:1,C:2,D:3};
+            card.querySelectorAll('.answerDiv')[optionMap[e.target.value]].classList.add('correct');
+
+            outputEl.textContent = JSON.stringify({questions:currentQuestions,categories:getSelectedCategories()}, null, 2);
+        });
+    });
+
     outputEl.textContent = JSON.stringify({questions:currentQuestions,categories:getSelectedCategories()}, null, 2);
 }
 
