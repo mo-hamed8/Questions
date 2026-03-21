@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Answer;
 use App\Models\Category;
 use App\Models\Question;
+use App\Services\OpenAIService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -78,5 +79,46 @@ class QuestionController extends Controller
             "message" => "Answer saved",
             "isCorrect" => $isCorrect
         ], 200);
+    }
+
+    public function getExplanation(Question $q, $save = False, OpenAIService $explanation)
+    {
+
+        if ($q->answer == "A") {
+            $answer = $q->choiceA;
+        } elseif ($q->answer == "B") {
+            $answer = $q->choiceB;
+        } elseif ($q->answer == "C") {
+            $answer = $q->choiceC;
+        } else {
+            $answer = $q->choiceD;
+        }
+
+        $qFormat = [
+            "question" => $q->title,
+            "answer" => $answer
+        ];
+
+        $response = $explanation->chat($qFormat);
+
+        if ($save) {
+            $this->saveExplanation($q, $response);
+        }
+
+        return $response;
+    }
+
+    private function saveExplanation(Question $q, $response)
+    {
+        $q->explanation()->create([
+            'rule_name' => 'Present Continuous',
+            'grammar_topic' => 'Verb Tenses',
+            'tags' => ['present continuous', 'tense'],
+            'reason' => 'The action is happening now',
+            'detailed_explanation' => 'We use present continuous for ongoing actions...',
+            'arabic_explanation' => 'نستخدم المضارع المستمر للأفعال الجارية الآن',
+            'confidence' => 0.95
+        ]);
+        return 0;
     }
 }
