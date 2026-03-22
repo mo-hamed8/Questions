@@ -81,44 +81,55 @@ class QuestionController extends Controller
         ], 200);
     }
 
-    public function getExplanation(Question $q, $save = False, OpenAIService $explanation)
+    public function getExplanationFromApi(Question $question, OpenAIService $explanation, $save = True)
     {
 
-        if ($q->answer == "A") {
-            $answer = $q->choiceA;
-        } elseif ($q->answer == "B") {
-            $answer = $q->choiceB;
-        } elseif ($q->answer == "C") {
-            $answer = $q->choiceC;
+        if ($question->answer == "A") {
+            $answer = $question->choiceA;
+        } elseif ($question->answer == "B") {
+            $answer = $question->choiceB;
+        } elseif ($question->answer == "C") {
+            $answer = $question->choiceC;
         } else {
-            $answer = $q->choiceD;
+            $answer = $question->choiceD;
         }
 
         $qFormat = [
-            "question" => $q->title,
+            "question" => $question->title,
             "answer" => $answer
         ];
+
 
         $response = $explanation->chat($qFormat);
 
         if ($save) {
-            $this->saveExplanation($q, $response);
+            $this->saveExplanation($question, $response);
         }
 
         return $response;
     }
 
-    private function saveExplanation(Question $q, $response)
+    private function saveExplanation(Question $question, array $response)
     {
-        $q->explanation()->create([
-            'rule_name' => 'Present Continuous',
-            'grammar_topic' => 'Verb Tenses',
-            'tags' => ['present continuous', 'tense'],
-            'reason' => 'The action is happening now',
-            'detailed_explanation' => 'We use present continuous for ongoing actions...',
-            'arabic_explanation' => 'نستخدم المضارع المستمر للأفعال الجارية الآن',
-            'confidence' => 0.95
+        $question->explanation()->create([
+            'rule_name' => $response['rule_name'],
+            'grammar_topic' => $response['grammar_topic'],
+            'tags' => $response['tags'] ?? [],
+            'reason' => $response['reason'],
+            'detailed_explanation' => $response['detailed_explanation'],
+            'arabic_explanation' => $response['arabic_explanation'],
+            'confidence' => $response['confidence'],
         ]);
-        return 0;
+    }
+
+    public function getExplanation(Question $question,OpenAIService $openAIService)
+    {
+        $exp = $question->explanation()->first();
+
+if ($exp) {
+    return $exp; // تم العثور على الشرح
+} else {
+    return $this->getExplanationFromApi($question, $openAIService);
+}
     }
 }

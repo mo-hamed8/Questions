@@ -18,3 +18,7 @@ Route::get("categories",[CategoryController::class,"index"]);
 
 Route::get("questionByFilter/{categories}",[FilterController::class,"questionByFilter"]);
 Route::get("wrongQuestionsToday",[FilterController::class,"wrongQuestionsToday"]);
+
+
+Route::get("getExplanationFromApi/{question}",[QuestionController::class,"getExplanationFromApi"]);
+Route::get("getExplanation/{question}",[QuestionController::class,"getExplanation"]);

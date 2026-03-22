@@ -71,14 +71,13 @@
     </main>
 
     <script>
-        const API_BASE = "api"; // نقطة النهاية للـ API
+        const API_BASE = "api";
         const TOKEN = localStorage.getItem("token");
-        const categoriesParam = @json(request()->route('categories')); // جلب التصنيفات من route
+        const categoriesParam = @json(request()->route('categories'));
         let QUESTIONS = [];
 
         async function loadQuestions() {
             try {
-                // استخدام endpoint questionByFilter مع التصنيفات
                 const res = await fetch(`/api/questionByFilter/${categoriesParam}`);
                 if (!res.ok) throw new Error("Failed to fetch questions");
                 QUESTIONS = await res.json();
@@ -93,7 +92,6 @@
         document.addEventListener("DOMContentLoaded", loadQuestions);
 
         const state = { answers: [] };
-
         const elQ = document.getElementById("questions");
         const answeredText = document.getElementById("answeredText");
         const progressBar = document.getElementById("progressBar");
@@ -156,8 +154,18 @@
         }
 
         async function sendAnswer(payload) {
-            console.log("fffffffffffffffffffff");
             return fetch(`/${API_BASE}/answer`, { method:"POST", headers:headers(), body:JSON.stringify(payload) });
+        }
+
+        async function fetchExplanation(questionId) {
+            try {
+                const res = await fetch(`/api/getExplanation/${questionId}`);
+                if (!res.ok) throw new Error("Failed to fetch explanation");
+                return await res.json();
+            } catch (e) {
+                console.error(e);
+                return null;
+            }
         }
 
         function render() {
@@ -208,10 +216,43 @@
                 catDiv.id=`categories-${i}`;
                 catDiv.className="mt-1 text-xs text-gray-500 italic";
 
+                // زر Show Explanation باللون الزاهي
+                const explainBtn = document.createElement("button");
+                explainBtn.type = "button";
+                explainBtn.className = "mt-3 rounded-md bg-yellow-400 text-gray-900 px-3 py-2 text-sm font-medium hover:bg-yellow-500 shadow-sm transition";
+                explainBtn.textContent = "Show Explanation";
+
+                const explanationDiv = document.createElement("div");
+                explanationDiv.className = "mt-2 text-sm text-gray-600";
+
+                explainBtn.addEventListener("click", async ()=>{
+                    explanationDiv.innerHTML = "Loading...";
+                    const data = await fetchExplanation(q.id);
+
+                    if(!data){
+                        explanationDiv.textContent = "Error fetching explanation.";
+                        return;
+                    }
+
+                    explanationDiv.innerHTML = `
+                        <div class="mt-2 border-l-4 border-blue-400 bg-blue-50 p-3 rounded-md space-y-2">
+                            <div><strong>Rule:</strong> <span style="direction:ltr; unicode-bidi:embed;">${data.rule_name}</span></div>
+                            <div><strong>Topic:</strong> <span style="direction:ltr; unicode-bidi:embed;">${data.grammar_topic}</span></div>
+                            <div><strong>Reason:</strong> <span style="direction:ltr; unicode-bidi:embed;">${data.reason}</span></div>
+                            <div><strong>Explanation (EN):</strong> <span style="direction:ltr; unicode-bidi:embed;">${data.detailed_explanation}</span></div>
+                            <div><strong>Explanation (AR):</strong> <span style="direction:rtl; unicode-bidi:embed;">${data.arabic_explanation}</span></div>
+                            ${data.tags && data.tags.length ? `<div><strong>Tags:</strong> <span style="direction:ltr; unicode-bidi:embed;">${data.tags.join(", ")}</span></div>` : ""}
+                        </div>
+                    `;
+                });
+
                 card.appendChild(title);
                 card.appendChild(opts);
                 card.appendChild(msg);
                 card.appendChild(catDiv);
+                card.appendChild(explainBtn);
+                card.appendChild(explanationDiv);
+
                 elQ.appendChild(card);
             });
 

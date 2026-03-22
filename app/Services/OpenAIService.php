@@ -17,9 +17,9 @@ class OpenAIService
     {
         $this->url = config('services.openai.base_url');
         $this->key = config('services.openai.key');
-        $this->key = config('services.openai.model');
+        $this->model = config('services.openai.model');
         $this->timeout = config('services.openai.timeout');
-        $this->timeout = config('services.openai.max_output_tokens');
+        $this->max_output_tokens = config('services.openai.max_output_tokens');
     }
 
     public function chat(array $data): array
@@ -81,11 +81,9 @@ PROMPT;
 
                 "temperature" => 0.2,
 
-                "max_output_tokens" => $this->max_output_tokens,
+                "max_output_tokens" =>(int) $this->max_output_tokens,
 
-                "response_format" => [
-                    "type" => "json_object"
-                ],
+
             ]);
 
             $result = $response->throw()->json();
