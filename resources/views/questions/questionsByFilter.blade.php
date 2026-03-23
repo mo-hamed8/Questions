@@ -288,11 +288,15 @@ function render() {
             }
 
             explanationDiv.innerHTML = `
-                <div class="mt-2 border-l-4 border-blue-400 bg-blue-50 p-3 rounded-md space-y-2">
-                    <div><strong>Rule:</strong> ${data.rule_name}</div>
-                    <div><strong>Explanation:</strong> ${data.detailed_explanation}</div>
-                </div>
-            `;
+                        <div class="mt-2 border-l-4 border-blue-400 bg-blue-50 p-3 rounded-md space-y-2">
+                            <div><strong>Rule:</strong> <span style="direction:ltr; unicode-bidi:embed;">${data.rule_name}</span></div>
+                            <div><strong>Topic:</strong> <span style="direction:ltr; unicode-bidi:embed;">${data.grammar_topic}</span></div>
+                            <div><strong>Reason:</strong> <span style="direction:ltr; unicode-bidi:embed;">${data.reason}</span></div>
+                            <div><strong>Explanation (EN):</strong> <span style="direction:ltr; unicode-bidi:embed;">${data.detailed_explanation}</span></div>
+                            <div><strong>Explanation (AR):</strong> <span style="direction:rtl; unicode-bidi:embed;">${data.arabic_explanation}</span></div>
+                            ${data.tags && data.tags.length ? `<div><strong>Tags:</strong> <span style="direction:ltr; unicode-bidi:embed;">${data.tags.join(", ")}</span></div>` : ""}
+                        </div>
+                    `;
         });
 
         card.appendChild(title);
