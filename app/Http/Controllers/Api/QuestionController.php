@@ -96,6 +96,10 @@ class QuestionController extends Controller
 
         $qFormat = [
             "question" => $question->title,
+            "choiceA" => $question->choiceA,
+            "choiceB" => $question->choiceB,
+            "choiceC" => $question->choiceC,
+            "choiceD" => $question->choiceD,
             "answer" => $answer
         ];
 
