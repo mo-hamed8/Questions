@@ -206,7 +206,8 @@ function render() {
 
         const title = document.createElement("div");
         title.className = "font-medium text-gray-900";
-        title.textContent = `${i+1}. ${q.title}`;
+        const formatted = q.title.replace(/(\d+\))/g, '<br>$1');
+        title.innerHTML = `${i+1}. ${formatted}`;
 
         const opts = document.createElement("div");
         opts.className = "mt-3 grid gap-2";
